@@ -11,134 +11,9 @@ not_found do
   "Oh noes, a 404"
 end
 
-get '/test' do
-  haml :graph, :layout => :test
-end
-
 get '/' do
   hosts = hostnames
   hosts.join("<br />")
-end
-get '/graph/:hostname/:service/:id/?' do
-  if hostnames.include? params[:hostname]
-    if host_services(params[:hostname]).keys.include? params[:service]
-      content_type "image/png"
-
-      data = YAML::load(File.open("#{options.confdir}#{params[:service]}.yaml"))
-
-      args = []
-      args << "rrdtool"
-      args << "graph"
-      args << "-"
-      args << "--title #{data["title"]}"
-      args << "--width #{data["width"]}"
-      args << "--height #{data["height"]}"
-      
-      if data["alt_y_grid"]
-        args << "--alt-y-grid"
-      end
-
-      data["values"].each { |value|
-        if data["single_file"]
-          args << "DEF:#{value["name"]}=#{options.rrddir}#{params[:hostname]}/#{params[:service]}-#{params[:id]}/#{data["rrds"]}.rrd:#{value["ds"]}:AVERAGE"
-        else
-          args << "DEF:#{value["name"]}=#{options.rrddir}#{params[:hostname]}/#{params[:service]}-#{params[:id]}/#{data["rrds"]}-#{value["name"]}.rrd:#{value["ds"]}:AVERAGE"
-        end
-
-        if value["cdef"].nil?
-          val_to_graph = value["name"]
-        else
-          value["cdef"].each { |cdef|
-            args << "CDEF:#{cdef["name"]}=#{cdef["rpn"]}"
-            if cdef["graph"]
-              val_to_graph = cdef["name"]
-            end
-          }
-        end
-
-        if value["stacked"]
-          args << "#{value["type"]}:#{val_to_graph}##{value["color"]}:\"#{value["text"]}\\t\":STACK"
-        else
-          args << "#{value["type"]}:#{val_to_graph}##{value["color"]}:\"#{value["text"]}\\t\""
-        end
-        
-        args << "GPRINT:#{val_to_graph}:LAST:\"\\tCur\\: %2.1lf\\g\""
-        args << "GPRINT:#{val_to_graph}:AVERAGE:\"\\tAvg\\: %2.1lf\\g\""
-        args << "GPRINT:#{val_to_graph}:MAX:\"\\tMax\\: %2.1lf\\j\""
-      }
-
-      Open3.popen3(args.join(" ")) { |stdin, stdout, stderr|
-        stdout.read()
-      }
-    else
-      status 404
-    end
-  else
-    status 404
-  end
-end
-
-get '/graph/:hostname/:service/?' do
-  if hostnames.include? params[:hostname]
-    if host_services(params[:hostname]).keys.include? params[:service]
-      content_type "image/png"
-      data = YAML::load(File.open("#{options.confdir}#{params[:service]}.yaml"))
-
-      args = []
-      args << "rrdtool"
-      args << "graph"
-      args << "-"
-      args << "--title #{data["title"]}"
-      args << "--width #{data["width"]}"
-      args << "--height #{data["height"]}"
-
-      if data["alt_y_grid"]
-        args << "--alt-y-grid"
-      end
-
-      data["values"].each { |value|
-        if !value["no_def"]
-          if data["single_file"]
-            args << "DEF:#{value["name"]}=#{options.rrddir}#{params[:hostname]}/#{params[:service]}/#{data["rrds"]}.rrd:#{value["ds"]}:AVERAGE"
-          else
-            args << "DEF:#{value["name"]}=#{options.rrddir}#{params[:hostname]}/#{params[:service]}/#{data["rrds"]}-#{value["name"]}.rrd:#{value["ds"]}:AVERAGE"
-          end
-        end
-
-        if value["cdef"].nil?
-          val_to_graph = value["name"]
-        else
-          value["cdef"].each { |cdef|
-            args << "CDEF:#{cdef["name"]}=#{cdef["rpn"]}"
-            if cdef["graph"]
-              val_to_graph = cdef["name"]
-            end
-          }
-        end
-
-        if value["stacked"]
-          args << "#{value["type"]}:#{val_to_graph}##{value["color"]}#{value["no_gprint"] ? ":" : ":\"#{value["text"]}\\t\""}:STACK"
-        else
-          args << "#{value["type"]}:#{val_to_graph}##{value["color"]}#{value["no_gprint"] ? ":" : ":\"#{value["text"]}\\t\""}"
-        end
-
-        if !value["no_gprint"]
-          args << "GPRINT:#{val_to_graph}:LAST:\"\\tCur\\: %2.1lf#{'%s' if value["si_units"]}\\g\""
-          args << "GPRINT:#{val_to_graph}:AVERAGE:\"\\tAvg\\: %2.1lf#{'%s' if value["si_units"]}\\g\""
-          args << "GPRINT:#{val_to_graph}:MAX:\"\\tMax\\: %2.1lf#{'%s' if value["si_units"]}\\j\""
-        end
-      }
-
-      puts args.join(" ")
-      Open3.popen3(args.join(" ")) { |stdin, stdout, stderr|
-        stdout.read()
-      }
-    else
-      status 404
-    end
-  else
-    status 404
-  end
 end
 
 get '/:hostname/?' do
@@ -163,6 +38,33 @@ get '/:hostname/:service/?' do
         }
       end
       haml :graph, :layout => :test
+    else
+      status 404
+    end
+  else
+    status 404
+  end
+end
+
+get '/data/:hostname/:service/?' do
+  if hostnames.include? params[:hostname]
+    if host_services(params[:hostname]).keys.include? params[:service]
+      config = YAML::load(File.open("#{options.confdir}#{params[:service]}.yaml"))
+      args = []
+
+      args << "rrdtool"
+      args << "xport"
+      args << "--start" << params[:start]
+      args << "--end" << (params[:end].nil? ? "now" : params[:end])
+
+      config["datasources"].each { |datasource|
+        args << "DEF:#{datasource["name"]}=#{options.rrddir}#{params[:hostname]}/#{params[:service]}/#{datasource["rrd"]}:#{datasource["ds"]}:AVERAGE"
+        args << "XPORT:#{datasource["name"]}:\"#{datasource["title"]}\""
+      }
+
+      Open3.popen3(args.join(" ")) { |stdin, stdout, stderr|
+        stdout.read()
+      }
     else
       status 404
     end

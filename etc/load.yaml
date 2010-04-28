@@ -2,25 +2,19 @@
 title: Load
 height: 100
 width: 650
-rrds: load
-single_file: true
-alt_y_grid: true
-values:
+datasources:
  -
   name: shortterm
-  text: "1 Min"
+  title: "1 Min"
   ds: shortterm
-  type: LINE1
-  color: 0000FF
+  rrd: load.rrd
  -
   name: midterm
-  text: "5 Min"
+  title: "5 Min"
   ds: midterm
-  type: LINE1
-  color: 00FF00
+  rrd: load.rrd
  -
   name: longterm
-  text: "15 Min"
+  title: "15 Min"
   ds: longterm
-  type: LINE1
-  color: FF0000
+  rrd: load.rrd
