@@ -10,29 +10,53 @@ values:
   ds: value
   type: AREA
   stacked: true
-  color: 0000FF
+  color: FFBFBF
   si_units: true
+ -
+  name: used
+  type: LINE1
+  color: FF0000
+  no_gprint: true
+  no_def: true
  -
   name: buffered
   text: Buffers
   ds: value
   type: AREA
   stacked: true
-  color: 00FF00
+  color: FFEBBF
   si_units: true
+ -
+  name: buffered
+  type: LINE1
+  color: FFB000
+  no_gprint: true
+  no_def: true
  -
   name: cached
   text: Cache
   ds: value
   type: AREA
   stacked: true
-  color: FF0000
+  color: BFBFFF
   si_units: true
+ -
+  name: cached
+  type: LINE1
+  color: 0000FF
+  no_gprint: true
+  no_def: true
  -
   name: free
   text: Free
   ds: value
   type: AREA
   stacked: true
-  color: 00FFFF
+  color: BFF7BF
   si_units: true
+ - 
+  name: free
+  type: LINE1
+  color: 00FF00
+  no_gprint: true
+  no_def: true

@@ -97,10 +97,12 @@ get '/graph/:hostname/:service/?' do
       end
 
       data["values"].each { |value|
-        if data["single_file"]
-          args << "DEF:#{value["name"]}=#{options.rrddir}#{params[:hostname]}/#{params[:service]}/#{data["rrds"]}.rrd:#{value["ds"]}:AVERAGE"
-        else
-          args << "DEF:#{value["name"]}=#{options.rrddir}#{params[:hostname]}/#{params[:service]}/#{data["rrds"]}-#{value["name"]}.rrd:#{value["ds"]}:AVERAGE"
+        if !value["no_def"]
+          if data["single_file"]
+            args << "DEF:#{value["name"]}=#{options.rrddir}#{params[:hostname]}/#{params[:service]}/#{data["rrds"]}.rrd:#{value["ds"]}:AVERAGE"
+          else
+            args << "DEF:#{value["name"]}=#{options.rrddir}#{params[:hostname]}/#{params[:service]}/#{data["rrds"]}-#{value["name"]}.rrd:#{value["ds"]}:AVERAGE"
+          end
         end
 
         if value["cdef"].nil?
@@ -115,13 +117,16 @@ get '/graph/:hostname/:service/?' do
         end
 
         if value["stacked"]
-          args << "#{value["type"]}:#{val_to_graph}##{value["color"]}:\"#{value["text"]}\\t\":STACK"
+          args << "#{value["type"]}:#{val_to_graph}##{value["color"]}#{value["no_gprint"] ? ":" : ":\"#{value["text"]}\\t\""}:STACK"
         else
-          args << "#{value["type"]}:#{val_to_graph}##{value["color"]}:\"#{value["text"]}\\t\""
+          args << "#{value["type"]}:#{val_to_graph}##{value["color"]}#{value["no_gprint"] ? ":" : ":\"#{value["text"]}\\t\""}"
         end
-        args << "GPRINT:#{val_to_graph}:LAST:\"\\tCur\\: %2.1lf#{'%s' if value["si_units"]}\\g\""
-        args << "GPRINT:#{val_to_graph}:AVERAGE:\"\\tAvg\\: %2.1lf#{'%s' if value["si_units"]}\\g\""
-        args << "GPRINT:#{val_to_graph}:MAX:\"\\tMax\\: %2.1lf#{'%s' if value["si_units"]}\\j\""
+
+        if !value["no_gprint"]
+          args << "GPRINT:#{val_to_graph}:LAST:\"\\tCur\\: %2.1lf#{'%s' if value["si_units"]}\\g\""
+          args << "GPRINT:#{val_to_graph}:AVERAGE:\"\\tAvg\\: %2.1lf#{'%s' if value["si_units"]}\\g\""
+          args << "GPRINT:#{val_to_graph}:MAX:\"\\tMax\\: %2.1lf#{'%s' if value["si_units"]}\\j\""
+        end
       }
 
       puts args.join(" ")
