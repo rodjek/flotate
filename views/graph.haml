@@ -1,0 +1,8 @@
+- @data.each do |foo|
+    .grid_12
+        %h2= foo[:title]
+    .clear
+    - foo[:graphs].each do |graph|
+        %div{:class => "grid_10 prefix_2"}
+            %img{:src => graph}
+        .clear

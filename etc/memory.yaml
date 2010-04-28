@@ -1,0 +1,54 @@
+---
+title: Memory
+height: 100
+width: 650
+rrds: memory
+values:
+ -
+  name: used
+  text: Used
+  ds: value
+  type: AREA
+  stacked: true
+  color: 0000FF
+  cdef: 
+   -
+    name: used_mb
+    rpn: "used,1024,/,1024,/"
+    graph: true
+ -
+  name: buffered
+  text: Buffers
+  ds: value
+  type: AREA
+  stacked: true
+  color: 00FF00
+  cdef:
+   -
+    name: buffered_mb
+    rpn: "buffered,1024,/,1024,/"
+    graph: true
+ -
+  name: cached
+  text: Cache
+  ds: value
+  type: AREA
+  stacked: true
+  color: FF0000
+  cdef:
+   -
+    name: cached_mb
+    rpn: "cached,1024,/,1024,/"
+    graph: true
+ -
+  name: free
+  text: Free
+  ds: value
+  type: AREA
+  stacked: true
+  color: 00FFFF
+  cdef:
+   -
+    name: free_mb
+    rpn: "free,1024,/,1024,/"
+    graph: true

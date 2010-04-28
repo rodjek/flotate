@@ -1,0 +1,42 @@
+---
+title: Processes
+height: 100
+width: 650
+rrds: ps_state
+values:
+ -
+  name: running
+  text: Running Processes
+  ds: value
+  type: LINE3
+  color: 0000FF
+ -
+  name: blocked
+  text: Blocked Processes
+  ds: value
+  type: LINE3
+  color: 00FF00
+ -
+  name: paging
+  text: Paging Processes
+  ds: value
+  type: LINE3
+  color: FF0000
+ -
+  name: sleeping
+  text: Sleeping Processes
+  ds: value
+  type: LINE3
+  color: 00FFFF
+ -
+  name: stopped
+  text: Stopped Processes
+  ds: value
+  type: LINE3
+  color: FF00FF
+ -
+  name: zombies
+  text: Zombie Processes
+  ds: value
+  type: LINE3
+  color: FFFF00

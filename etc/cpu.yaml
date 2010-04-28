@@ -1,0 +1,62 @@
+---
+title: CPU
+height: 100
+width: 650
+rrds: cpu
+values:
+ -
+  name: user
+  text: User
+  ds: value
+  type: AREA
+  stacked: true
+  color: FF00FF
+ -
+  name: interrupt
+  text: Interrupt
+  ds: value
+  type: AREA
+  stacked: true
+  color: 00FF00
+ -
+  name: nice
+  text: Nice
+  ds: value
+  type: AREA
+  stacked: true
+  color: FF0000
+ -
+  name: softirq
+  text: Nice
+  ds: value
+  type: AREA
+  stacked: true
+  color: 00FFFF
+ -
+  name: steal
+  text: Steal
+  ds: value
+  type: AREA
+  stacked: true
+  color: FFFF00
+ -
+  name: system
+  text: System
+  ds: value
+  type: AREA
+  stacked: true
+  color: 003377
+ -
+  name: wait
+  text: IO Wait
+  ds: value
+  type: AREA
+  stacked: true
+  color: 333300
+ -
+  name: idle
+  text: Idle
+  ds: value
+  type: AREA
+  stacked: true
+  color: 0000FF

@@ -1,0 +1,26 @@
+---
+title: Load
+height: 100
+width: 650
+rrds: load
+single_file: true
+alt_y_grid: true
+values:
+ -
+  name: shortterm
+  text: "1 Min"
+  ds: shortterm
+  type: LINE2
+  color: 0000FF
+ -
+  name: midterm
+  text: "5 Min"
+  ds: midterm
+  type: LINE2
+  color: 00FF00
+ -
+  name: longterm
+  text: "15 Min"
+  ds: longterm
+  type: LINE2
+  color: FF0000
