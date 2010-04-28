@@ -11,11 +11,7 @@ values:
   type: AREA
   stacked: true
   color: 0000FF
-  cdef: 
-   -
-    name: used_mb
-    rpn: "used,1024,/,1024,/"
-    graph: true
+  si_units: true
  -
   name: buffered
   text: Buffers
@@ -23,11 +19,7 @@ values:
   type: AREA
   stacked: true
   color: 00FF00
-  cdef:
-   -
-    name: buffered_mb
-    rpn: "buffered,1024,/,1024,/"
-    graph: true
+  si_units: true
  -
   name: cached
   text: Cache
@@ -35,11 +27,7 @@ values:
   type: AREA
   stacked: true
   color: FF0000
-  cdef:
-   -
-    name: cached_mb
-    rpn: "cached,1024,/,1024,/"
-    graph: true
+  si_units: true
  -
   name: free
   text: Free
@@ -47,8 +35,4 @@ values:
   type: AREA
   stacked: true
   color: 00FFFF
-  cdef:
-   -
-    name: free_mb
-    rpn: "free,1024,/,1024,/"
-    graph: true
+  si_units: true
