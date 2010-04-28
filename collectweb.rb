@@ -2,6 +2,8 @@ require 'rubygems'
 require 'sinatra'
 require 'open3'
 require 'yaml'
+require 'active_support'
+require 'json'
 
 set :rrddir, "/home/tim/collectweb/rrd/" 
 set :confdir, "etc/"
@@ -63,7 +65,7 @@ get '/data/:hostname/:service/?' do
       }
 
       Open3.popen3(args.join(" ")) { |stdin, stdout, stderr|
-        stdout.read()
+        Hash.from_xml(stdout.read()).to_json
       }
     else
       status 404
