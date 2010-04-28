@@ -44,15 +44,27 @@ get '/graph/:hostname/:service/:id/?' do
         else
           args << "DEF:#{value["name"]}=#{options.rrddir}#{params[:hostname]}/#{params[:service]}-#{params[:id]}/#{data["rrds"]}-#{value["name"]}.rrd:#{value["ds"]}:AVERAGE"
         end
-        if value["stacked"]
-          args << "#{value["type"]}:#{value["name"]}##{value["color"]}:\"#{value["text"]}\\t\":STACK"
+
+        if value["cdef"].nil?
+          val_to_graph = value["name"]
         else
-          args << "#{value["type"]}:#{value["name"]}##{value["color"]}:\"#{value["text"]}\\t\""
+          value["cdef"].each { |cdef|
+            args << "CDEF:#{cdef["name"]}=#{cdef["rpn"]}"
+            if cdef["graph"]
+              val_to_graph = cdef["name"]
+            end
+          }
+        end
+
+        if value["stacked"]
+          args << "#{value["type"]}:#{val_to_graph}##{value["color"]}:\"#{value["text"]}\\t\":STACK"
+        else
+          args << "#{value["type"]}:#{val_to_graph}##{value["color"]}:\"#{value["text"]}\\t\""
         end
         
-        args << "GPRINT:#{value["name"]}:LAST:\"\\tCur\\: %2.1lf\\g\""
-        args << "GPRINT:#{value["name"]}:AVERAGE:\"\\tAvg\\: %2.1lf\\g\""
-        args << "GPRINT:#{value["name"]}:MAX:\"\\tMax\\: %2.1lf\\j\""
+        args << "GPRINT:#{val_to_graph}:LAST:\"\\tCur\\: %2.1lf\\g\""
+        args << "GPRINT:#{val_to_graph}:AVERAGE:\"\\tAvg\\: %2.1lf\\g\""
+        args << "GPRINT:#{val_to_graph}:MAX:\"\\tMax\\: %2.1lf\\j\""
       }
 
       Open3.popen3(args.join(" ")) { |stdin, stdout, stderr|
@@ -90,14 +102,26 @@ get '/graph/:hostname/:service/?' do
         else
           args << "DEF:#{value["name"]}=#{options.rrddir}#{params[:hostname]}/#{params[:service]}/#{data["rrds"]}-#{value["name"]}.rrd:#{value["ds"]}:AVERAGE"
         end
-        if value["stacked"]
-          args << "#{value["type"]}:#{value["name"]}##{value["color"]}:\"#{value["text"]}\\t\":STACK"
+
+        if value["cdef"].nil?
+          val_to_graph = value["name"]
         else
-          args << "#{value["type"]}:#{value["name"]}##{value["color"]}:\"#{value["text"]}\\t\""
+          value["cdef"].each { |cdef|
+            args << "CDEF:#{cdef["name"]}=#{cdef["rpn"]}"
+            if cdef["graph"]
+              val_to_graph = cdef["name"]
+            end
+          }
         end
-        args << "GPRINT:#{value["name"]}:LAST:\"\\tCur\\: %2.1lf\\g\""
-        args << "GPRINT:#{value["name"]}:AVERAGE:\"\\tAvg\\: %2.1lf\\g\""
-        args << "GPRINT:#{value["name"]}:MAX:\"\\tMax\\: %2.1lf\\j\""
+
+        if value["stacked"]
+          args << "#{value["type"]}:#{val_to_graph}##{value["color"]}:\"#{value["text"]}\\t\":STACK"
+        else
+          args << "#{value["type"]}:#{val_to_graph}##{value["color"]}:\"#{value["text"]}\\t\""
+        end
+        args << "GPRINT:#{val_to_graph}:LAST:\"\\tCur\\: %2.1lf#{'%s' if value["si_units"]}\\g\""
+        args << "GPRINT:#{val_to_graph}:AVERAGE:\"\\tAvg\\: %2.1lf#{'%s' if value["si_units"]}\\g\""
+        args << "GPRINT:#{val_to_graph}:MAX:\"\\tMax\\: %2.1lf#{'%s' if value["si_units"]}\\j\""
       }
 
       puts args.join(" ")
