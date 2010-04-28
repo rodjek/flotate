@@ -10,17 +10,17 @@ values:
   name: shortterm
   text: "1 Min"
   ds: shortterm
-  type: LINE2
+  type: LINE1
   color: 0000FF
  -
   name: midterm
   text: "5 Min"
   ds: midterm
-  type: LINE2
+  type: LINE1
   color: 00FF00
  -
   name: longterm
   text: "15 Min"
   ds: longterm
-  type: LINE2
+  type: LINE1
   color: FF0000
