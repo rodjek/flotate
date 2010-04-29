@@ -2,61 +2,79 @@
 title: CPU
 height: 100
 width: 650
-rrds: cpu
-values:
+graph_opts:
+ xaxis:
+  mode: time
+datasources:
  -
   name: user
-  text: User
+  title: User
   ds: value
-  type: AREA
-  stacked: true
-  color: FF00FF
+  rrd: cpu-user.rrd
+  plot:
+   bars:
+    show: true
+   stack: true
  -
   name: interrupt
-  text: Interrupt
+  title: Interrupt
   ds: value
-  type: AREA
-  stacked: true
-  color: 00FF00
+  rrd: cpu-interrupt.rrd
+  plot:
+   bars:
+    show: true
+   stack: true
  -
   name: nice
   text: Nice
   ds: value
-  type: AREA
-  stacked: true
-  color: FF0000
+  rrd: cpu-nice.rrd
+  plot:
+   bars:
+    show: true
+   stack: true
  -
   name: softirq
-  text: Nice
+  title: Nice
   ds: value
-  type: AREA
-  stacked: true
-  color: 00FFFF
+  rrd: cpu-softirq.rrd
+  plot:
+   bars:
+    show: true
+   stack: true
  -
   name: steal
-  text: Steal
+  title: Steal
   ds: value
-  type: AREA
-  stacked: true
-  color: FFFF00
+  rrd: cpu-steal.rrd
+  plot:
+   bars:
+    show: true
+   stack: true
  -
   name: system
-  text: System
+  title: System
   ds: value
-  type: AREA
-  stacked: true
-  color: 003377
+  rrd: cpu-system.rrd
+  plot:
+   bars:
+    show: true
+   stack: true
  -
   name: wait
-  text: IO Wait
+  title: IO Wait
   ds: value
-  type: AREA
-  stacked: true
-  color: 333300
+  rrd: cpu-wait.rrd
+  plot:
+   bars:
+    show: true
+   stack: true
  -
   name: idle
-  text: Idle
+  title: Idle
   ds: value
-  type: AREA
-  stacked: true
-  color: 0000FF
+  rrd: cpu-idle.rrd
+  plot:
+   bars:
+    show: true
+   stack: true
