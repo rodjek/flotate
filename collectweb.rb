@@ -74,10 +74,12 @@ get '/data/:hostname/:service/?' do
         result = {}
         result[:start] = "#{data["xport"]["meta"]["start"]}000".to_i
         result[:end] = "#{data["xport"]["meta"]["start"]}000".to_i
+        result[:graph_opts] = config["graph_opts"]
         data["xport"]["meta"]["legend"]["entry"].each { |entry|
+          ds_config = config["datasources"].reject { |datasource| datasource["title"] != entry }.first
           index = data["xport"]["meta"]["legend"]["entry"].index entry
           values = data["xport"]["data"]["row"].map { |r| ["#{r["t"]}000".to_i, r["v"][index].to_f] }
-          (result[:data] ||= []) << {:label => "#{entry} = 0.00", :data => values}
+          (result[:data] ||= []) << {:label => entry, :data => values}.merge(ds_config["plot"])
         }
         result.to_json
       }
