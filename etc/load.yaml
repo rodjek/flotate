@@ -2,19 +2,31 @@
 title: Load
 height: 100
 width: 650
+graph_opts:
+ xaxis:
+  mode: "time"
 datasources:
  -
   name: shortterm
   title: "1 Min"
   ds: shortterm
   rrd: load.rrd
+  plot:
+   lines:
+    show: true
  -
   name: midterm
   title: "5 Min"
   ds: midterm
   rrd: load.rrd
+  plot:
+   lines:
+    show: true
  -
   name: longterm
   title: "15 Min"
   ds: longterm
   rrd: load.rrd
+  plot:
+   lines:
+    show: true

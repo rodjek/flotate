@@ -10,21 +10,21 @@
                 var plot;
                 $(function () {
                     var options = {
-                        series: {
-                            lines: { show: true }
-                        },
                         xaxis: { mode: "time" },
                         crosshair: { mode: "x" },
                         grid: { hoverable: true, autoHighlight: false }
                     };
+                    
 
                     plot = $.plot($("#graph"), [], options);
 
                     var graph_data;
+                    var graph_options;
                     function onDataReceived(foo) {
                         graph_data = foo["data"];
+                        graph_options = foo["graph_opts"];
 
-                        plot = $.plot($("#graph"), graph_data, options);
+                        plot = $.plot($("#graph"), graph_data, graph_options);
                     }
 
                     $.ajax({
