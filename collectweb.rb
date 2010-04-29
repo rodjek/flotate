@@ -5,7 +5,7 @@ require 'yaml'
 require 'active_support'
 require 'json'
 
-set :rrddir, "/home/tim/collectweb/rrd/" 
+set :rrddir, "rrd/" 
 set :confdir, "etc/"
 set :public, "public/"
 
