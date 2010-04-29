@@ -39,6 +39,10 @@ get '/:hostname/:service/?' do
           @data << {:title => "#{params[:service]}-#{key}", :graphs => ["/graph/#{params[:hostname]}/#{params[:service]}/#{key}/"]}
         }
       end
+      @end = (params[:end].nil? ? "now" : params[:end])
+      @start = (params[:start].nil? ? "now-24h" : params[:start])
+      @hostname = params[:hostname]
+      @service = params[:service]
       haml :graph, :layout => :test
     else
       status 404
@@ -54,10 +58,11 @@ get '/data/:hostname/:service/?' do
       config = YAML::load(File.open("#{options.confdir}#{params[:service]}.yaml"))
       args = []
 
+      @end = (params[:end].nil? ? "now" : params[:end])
       args << "rrdtool"
       args << "xport"
       args << "--start" << params[:start]
-      args << "--end" << (params[:end].nil? ? "now" : params[:end])
+      args << "--end" << @end
 
       config["datasources"].each { |datasource|
         args << "DEF:#{datasource["name"]}=#{options.rrddir}#{params[:hostname]}/#{params[:service]}/#{datasource["rrd"]}:#{datasource["ds"]}:AVERAGE"
@@ -65,7 +70,16 @@ get '/data/:hostname/:service/?' do
       }
 
       Open3.popen3(args.join(" ")) { |stdin, stdout, stderr|
-        Hash.from_xml(stdout.read()).to_json
+        data = Hash.from_xml(stdout.read())
+        result = {}
+        result[:start] = "#{data["xport"]["meta"]["start"]}000".to_i
+        result[:end] = "#{data["xport"]["meta"]["start"]}000".to_i
+        data["xport"]["meta"]["legend"]["entry"].each { |entry|
+          index = data["xport"]["meta"]["legend"]["entry"].index entry
+          values = data["xport"]["data"]["row"].map { |r| ["#{r["t"]}000".to_i, r["v"][index].to_f] }
+          (result[:data] ||= []) << {:label => "#{entry} = 0.00", :data => values}
+        }
+        result.to_json
       }
     else
       status 404

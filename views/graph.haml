@@ -4,5 +4,34 @@
     .clear
     - foo[:graphs].each do |graph|
         %div{:class => "grid_10 prefix_2"}
-            %img{:src => graph}
+            %div{:id => "graph", :style => "width:600px;height:300px;"}
+            %p{:id => "hoverdata"}
+            :javascript
+                var plot;
+                $(function () {
+                    var options = {
+                        series: {
+                            lines: { show: true }
+                        },
+                        xaxis: { mode: "time" },
+                        crosshair: { mode: "x" },
+                        grid: { hoverable: true, autoHighlight: false }
+                    };
+
+                    plot = $.plot($("#graph"), [], options);
+
+                    var graph_data;
+                    function onDataReceived(foo) {
+                        graph_data = foo["data"];
+
+                        plot = $.plot($("#graph"), graph_data, options);
+                    }
+
+                    $.ajax({
+                        url: "/data/#{@hostname}/#{@service}?start=#{@start}&end=#{@end}",
+                        method: 'GET',
+                        dataType: 'json',
+                        success: onDataReceived
+                    });
+                });
         .clear
