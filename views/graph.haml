@@ -19,7 +19,7 @@
                     }
 
                     $.ajax({
-                        url: "/data/#{@hostname}/#{@service}?start=#{@start}&end=#{@end}#{"&id=" + foo[:id] if foo[:id]}",
+                        url: "/data/#{@hostname}/#{@service}?start=#{@start}&end=#{@end}#{"&plugin_instance=" + foo[:plugin_instance] if foo[:plugin_instance]}",
                         method: 'GET',
                         dataType: 'json',
                         success: onDataReceived_#{foo[:title]}

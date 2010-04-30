@@ -22,6 +22,7 @@ get '/:hostname/?' do
   if hostnames.include? params[:hostname]
     services = host_services params[:hostname]
     services.keys.join("<br />")
+    p services
   else
     status 404
   end
@@ -36,7 +37,7 @@ get '/:hostname/:service/?' do
         @data << {:title => params[:service], :graphs => ["/graph/#{params[:hostname]}/#{params[:service]}/"]}
       else
         graphs.each { |key|
-          @data << {:title => "#{params[:service]}_#{key}", :id => key, :graphs => ["/graph/#{params[:hostname]}/#{params[:service]}/#{key}/"]}
+          @data << {:title => "#{params[:service]}_#{key}", :plugin_instance => key, :graphs => ["/graph/#{params[:hostname]}/#{params[:service]}/#{key}/"]}
         }
       end
       @end = (params[:end].nil? ? "now" : params[:end])
@@ -65,8 +66,8 @@ get '/data/:hostname/:service/?' do
       args << "--start" << params[:start]
       args << "--end" << @end
 
-      if params[:id]
-        service = "#{params[:service]}-#{params[:id]}"
+      if params[:plugin_instance]
+        service = "#{params[:service]}-#{params[:plugin_instance]}"
       else
         service = params[:service]
       end
