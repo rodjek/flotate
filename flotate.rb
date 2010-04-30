@@ -58,7 +58,6 @@ get '/:hostname/:plugin/?' do
       @start = (params[:start].nil? ? "now-24h" : params[:start])
       @hostname = params[:hostname]
       @service = params[:service]
-      p @data
       haml :graph, :layout => :test
     else
       status 404
