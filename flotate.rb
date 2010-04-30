@@ -28,15 +28,29 @@ get '/:hostname/?' do
   end
 end
 
-get '/:hostname/:service/?' do
+get '/:hostname/:plugin/?' do
   if hostnames.include? params[:hostname]
-    if host_services(params[:hostname]).keys.include? params[:service]
-      graphs = host_services(params[:hostname])[params[:service]]
+    if host_services(params[:hostname]).keys.include? params[:plugin]
+      graphs = new_host_services(params[:hostname])[params[:plugin]]
       @data = []
-      if graphs.empty?
-        @data << {:title => params[:service], :graphs => ["/graph/#{params[:hostname]}/#{params[:service]}/"]}
+      if graphs[:no_instances]
+        types = graphs.keys
+        types.delete(:no_instances)
+        if types
+          types.each { |type|
+            if graphs[type].empty?
+              @data << {:title => params[:plugin], :url => "/data/#{params[:hostname]}/#{params[:plugin]}/", :key => params[:plugin]}
+            else
+              graphs[type].each { |type_instance|
+                @data << {:title => "#{type} #{type_instance}", :url => "/data/#{params[:hostname]}/#{params[:plugin]}/", :type => type, :type_instance => type_instance, :key => "#{type}_#{type_instance}"}
+              }
+            end
+          }
+        end
+        p @data
       else
-        graphs.each { |key|
+        # FIXME!  FOR FUCKS SAKE, FIXME!
+        graphs.keys.each { |plugin_instance|
           @data << {:title => "#{params[:service]}_#{key}", :plugin_instance => key, :graphs => ["/graph/#{params[:hostname]}/#{params[:service]}/#{key}/"]}
         }
       end
@@ -54,10 +68,10 @@ get '/:hostname/:service/?' do
   end
 end
 
-get '/data/:hostname/:service/?' do
+get '/data/:hostname/:plugin/?' do
   if hostnames.include? params[:hostname]
-    if host_services(params[:hostname]).keys.include? params[:service]
-      config = YAML::load(File.open("#{options.confdir}#{params[:service]}.yaml"))
+    if host_services(params[:hostname]).keys.include? params[:plugin]
+      config = YAML::load(File.open("#{options.confdir}#{params[:plugin]}.yaml"))
       args = []
 
       @end = (params[:end].nil? ? "now" : params[:end])
@@ -67,16 +81,30 @@ get '/data/:hostname/:service/?' do
       args << "--end" << @end
 
       if params[:plugin_instance]
-        service = "#{params[:service]}-#{params[:plugin_instance]}"
+        service = "#{params[:plugin]}-#{params[:plugin_instance]}"
       else
-        service = params[:service]
+        service = params[:plugin]
+      end
+
+      if config.is_a? Array
+        if params[:type]
+          config = config.reject! { |r| r["type"] != params[:type] }.first
+        end
       end
 
       config["datasources"].each { |datasource|
-        args << "DEF:#{datasource["name"]}=#{options.rrddir}#{params[:hostname]}/#{service}/#{datasource["rrd"]}:#{datasource["ds"]}:AVERAGE"
+        if params[:type_instance]
+          raw_rrd = datasource["rrd"].split('.')
+          rrd = "#{raw_rrd[0]}-#{params[:type_instance]}.rrd"
+        else
+          rrd = datasource["rrd"]
+        end
+
+        args << "DEF:#{datasource["name"]}=#{options.rrddir}#{params[:hostname]}/#{service}/#{rrd}:#{datasource["ds"]}:AVERAGE"
         args << "XPORT:#{datasource["name"]}:\"#{datasource["title"]}\""
       }
 
+      puts args.join(" ")
       Open3.popen3(args.join(" ")) { |stdin, stdout, stderr|
         data = Hash.from_xml(stdout.read())
         result = {}
@@ -114,10 +142,52 @@ helpers do
     services.sort!
     data = {}
     services.each { |service|
-      foo = service.split('-')
-      data[foo[0]] ||= []
-      if foo.length > 1
-        data[foo[0]]  << foo[1]
+      plugin, plugin_instance = service.split('-')
+      data[plugin] ||= {}
+      if plugin_instance
+        data[plugin][plugin_instance] ||= true
+      end
+    }
+    data
+  end
+
+  def new_host_services(hostname)
+    plugins = Dir.new("rrd/#{hostname}").entries
+    plugins.delete(".")
+    plugins.delete("..")
+    plugins.sort!
+    data = {}
+    plugins.each { |raw_plugin|
+      plugin, plugin_instance = raw_plugin.split('-')
+      data[plugin] ||= {}
+      if plugin_instance
+        data[plugin][plugin_instance] ||= {}
+        types = Dir.new("rrd/#{hostname}/#{plugin}-#{plugin_instance}").entries
+        types.delete(".")
+        types.delete("..")
+        types.sort!
+        types.each { |raw_type|
+          type, type_instance = raw_type.split("-")
+          data[plugin][plugin_instance][type] ||= []
+          if type_instance
+            data[plugin][plugin_instance][type] << type_instance.split('.')[0]
+          end
+        }
+      else
+        data[plugin][:no_instances] = true
+        types = Dir.new("rrd/#{hostname}/#{plugin}").entries
+        types.delete(".")
+        types.delete("..")
+        types.sort!
+        types.each { |raw_type|
+          type, type_instance = raw_type.split("-")
+          if type_instance
+            data[plugin][type] ||= []
+            data[plugin][type] << type_instance.split('.')[0]
+          else
+            data[plugin][type.split('.')[0]] ||= []
+          end
+        }
       end
     }
     data

@@ -2,27 +2,26 @@
     .grid_12
         %h2= foo[:title]
     .clear
-    - foo[:graphs].each do |graph|
-        %div{:class => "grid_10 prefix_2"}
-            %div{:id => "graph_#{foo[:title]}", :style => "width:600px;height:300px;"}
-                Graph loading...
-            :javascript
-                var plot_#{foo[:title]};
-                $(function () {
-                    var graph_data_#{foo[:title]};
-                    var graph_options_#{foo[:title]};
-                    function onDataReceived_#{foo[:title]}(foo) {
-                        graph_data_#{foo[:title]} = foo["data"];
-                        graph_options_#{foo[:title]} = foo["graph_opts"];
+    %div{:class => "grid_10 prefix_2"}
+        %div{:id => "graph_#{foo[:key]}", :style => "width:600px;height:300px;"}
+            Graph loading...
+        :javascript
+            var plot_#{foo[:key]};
+            $(function () {
+                var graph_data_#{foo[:key]};
+                var graph_options_#{foo[:key]};
+                function onDataReceived_#{foo[:key]}(foo) {
+                    graph_data_#{foo[:key]} = foo["data"];
+                    graph_options_#{foo[:key]} = foo["graph_opts"];
 
-                        plot_#{foo[:title]} = $.plot($("#graph_#{foo[:title]}"), graph_data_#{foo[:title]}, graph_options_#{foo[:title]});
-                    }
+                    plot_#{foo[:key]} = $.plot($("#graph_#{foo[:key]}"), graph_data_#{foo[:key]}, graph_options_#{foo[:key]});
+                }
 
-                    $.ajax({
-                        url: "/data/#{@hostname}/#{@service}?start=#{@start}&end=#{@end}#{"&plugin_instance=" + foo[:plugin_instance] if foo[:plugin_instance]}",
-                        method: 'GET',
-                        dataType: 'json',
-                        success: onDataReceived_#{foo[:title]}
-                    });
+                $.ajax({
+                    url: "#{foo[:url]}?start=#{@start}&end=#{@end}#{"&plugin_instance=" + foo[:plugin_instance] if foo[:plugin_instance]}#{"&type=" + foo[:type] if foo[:type]}#{"&type_instance=" + foo[:type_instance] if foo[:type_instance]}",
+                    method: 'GET',
+                    dataType: 'json',
+                    success: onDataReceived_#{foo[:key]}
                 });
-        .clear
+            });
+    .clear

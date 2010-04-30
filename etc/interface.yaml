@@ -1,0 +1,76 @@
+---
+-
+ type: if_packets
+ title: Interface Packets
+ height: 100
+ width: 650
+ graph_opts:
+  xaxis:
+   mode: "time"
+ datasources:
+  -
+   name: rx
+   title: "Received"
+   ds: rx
+   rrd: if_packets.rrd
+   plot:
+    lines:
+     show: true
+  -
+   name: tx
+   title: "Transmitted"
+   ds: tx
+   rrd: if_packets.rrd
+   plot:
+    lines:
+     show: true
+-
+ type: if_octets
+ title: Interface Octets
+ height: 100
+ width: 650
+ graph_opts:
+  xaxis:
+   mode: "time"
+ datasources:
+  -
+   name: rx
+   title: Received
+   ds: rx
+   rrd: if_octets.rrd
+   plot:
+    lines:
+     show: true
+  -
+   name: tx
+   title: Transmitted
+   ds: tx
+   rrd: if_octets.rrd
+   plot:
+    lines:
+     show: true
+-
+ type: if_errors
+ title: Interface Errors
+ height: 100
+ width: 650
+ graph_opts:
+  xaxis:
+   mode: time
+ datasources:
+  -
+   name: rx
+   title: Received
+   ds: rx
+   rrd: if_errors.rrd
+   plot:
+    lines:
+     show: true
+  -
+   name: tx
+   title: Transmitted
+   ds: tx
+   rrd: if_errors.rrd
+   plot:
+    lines:
+     show: true
