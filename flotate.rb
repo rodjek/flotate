@@ -36,13 +36,14 @@ get '/:hostname/:service/?' do
         @data << {:title => params[:service], :graphs => ["/graph/#{params[:hostname]}/#{params[:service]}/"]}
       else
         graphs.each { |key|
-          @data << {:title => "#{params[:service]}-#{key}", :graphs => ["/graph/#{params[:hostname]}/#{params[:service]}/#{key}/"]}
+          @data << {:title => "#{params[:service]}_#{key}", :id => key, :graphs => ["/graph/#{params[:hostname]}/#{params[:service]}/#{key}/"]}
         }
       end
       @end = (params[:end].nil? ? "now" : params[:end])
       @start = (params[:start].nil? ? "now-24h" : params[:start])
       @hostname = params[:hostname]
       @service = params[:service]
+      p @data
       haml :graph, :layout => :test
     else
       status 404
@@ -64,8 +65,14 @@ get '/data/:hostname/:service/?' do
       args << "--start" << params[:start]
       args << "--end" << @end
 
+      if params[:id]
+        service = "#{params[:service]}-#{params[:id]}"
+      else
+        service = params[:service]
+      end
+
       config["datasources"].each { |datasource|
-        args << "DEF:#{datasource["name"]}=#{options.rrddir}#{params[:hostname]}/#{params[:service]}/#{datasource["rrd"]}:#{datasource["ds"]}:AVERAGE"
+        args << "DEF:#{datasource["name"]}=#{options.rrddir}#{params[:hostname]}/#{service}/#{datasource["rrd"]}:#{datasource["ds"]}:AVERAGE"
         args << "XPORT:#{datasource["name"]}:\"#{datasource["title"]}\""
       }
 
