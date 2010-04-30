@@ -32,13 +32,18 @@ get '/:hostname/:plugin/?' do
   if hostnames.include? params[:hostname]
     if host_services(params[:hostname]).keys.include? params[:plugin]
       graphs = new_host_services(params[:hostname])[params[:plugin]]
+      graph_config = YAML::load(File.open("#{options.confdir}/#{params[:plugin]}.yaml"))
       @data = []
       if graphs[:no_instances]
         types = graphs.keys
         types.delete(:no_instances)
         if types
           types.each { |type|
-            if graphs[type].empty?
+            if graph_config.is_a? Array
+              graph_config = graph_config.reject! { |r| r["type"] != type }.first
+            end
+
+            if (graphs[type].empty? or graph_config["combined"])
               @data << {:title => params[:plugin], :url => "/data/#{params[:hostname]}/#{params[:plugin]}/", :key => params[:plugin]}
             else
               graphs[type].each { |type_instance|
@@ -47,7 +52,6 @@ get '/:hostname/:plugin/?' do
             end
           }
         end
-        p @data
       else
         # FIXME!  FOR FUCKS SAKE, FIXME!
         graphs.keys.each { |plugin_instance|
@@ -103,7 +107,6 @@ get '/data/:hostname/:plugin/?' do
         args << "XPORT:#{datasource["name"]}:\"#{datasource["title"]}\""
       }
 
-      puts args.join(" ")
       Open3.popen3(args.join(" ")) { |stdin, stdout, stderr|
         data = Hash.from_xml(stdout.read())
         result = {}
